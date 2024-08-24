@@ -1,1 +1,1 @@
-# 240824-flask_chatting
+# 24/08/24 - flask_chatting (#17)
