@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import sqlite3
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -33,8 +34,13 @@ def chat():
 def handle_message(msg):
     conn = sqlite3.connect(DATA_FILE)
     cur = conn.cursor()
+    
+    now = datetime.now()
+    dt_str = now.strftime('%Y-%m-%d %H:%M:%S')
+    msg = f"({dt_str}) {msg}"
     cur.execute('INSERT INTO messages (message) VALUES (?)', (msg,))
     conn.commit()
+    print(msg)
 
     cur.execute('SELECT * FROM messages')
     data = cur.fetchall()
