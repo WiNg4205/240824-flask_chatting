@@ -7,9 +7,14 @@
 </head>
 <body>
     <h1>Chat Room</h1>
-    <div id="messages"></div>
     <input id="messageInput" placeholder="Type your message here...">
     <button onclick="sendMessage()">Send</button>
+    <button onClick="clearMessages()">Clear</button>
+    <ul id="messages">
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
 
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-2huaZvOR9iDzHqslqwpR87isEmrfxqyWOF7hr7BY6KG0+hVKLoEXMPUJw3ynWuhO" crossorigin="anonymous"></script>
     <script>
@@ -17,16 +22,26 @@
 
         socket.on('message', (msg) => {
             document.getElementById('messages').innerHTML = ''
-            const messageDiv = document.createElement('div')
-            messageDiv.textContent = msg
-            document.getElementById('messages').appendChild(messageDiv)
-        });
+            msg.forEach((message) => {
+                const messageLi = document.createElement('li')
+                messageLi.textContent = message
+                document.getElementById('messages').appendChild(messageLi)                
+            })
+        })
+
+        socket.on('clear', () => {
+            document.getElementById('messages').innerHTML = ''
+        })
 
         const sendMessage = () => {
             const input = document.getElementById('messageInput')
             const msg = input.value
             socket.send(msg)
             input.value = ''
+        }
+
+        const clearMessages = () => {
+            socket.emit('clear')
         }
 
         document.getElementById('messageInput').addEventListener('keypress', event => {

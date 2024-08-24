@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import sqlite3
+import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -16,6 +17,7 @@ def init_db():
             message TEXT
         )
     ''')
+    conn.close()
 
 @app.route('/')
 def hello():
@@ -23,7 +25,13 @@ def hello():
 
 @app.route('/chat')
 def chat():
-    return render_template('index.html')
+    conn = sqlite3.connect(DATA_FILE)
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM messages')
+    data = cur.fetchall()
+    
+    messages = [msg[0] for msg in data]
+    return render_template('index.html', messages=messages)
 
 @socketio.on('message')
 def handle_message(msg):
@@ -34,9 +42,19 @@ def handle_message(msg):
 
     cur.execute('SELECT * FROM messages')
     data = cur.fetchall()
-    print(data)
+    conn.close()
     
     emit('message', data, broadcast=True)
+    
+@socketio.on('clear')
+def handle_clear():
+    conn = sqlite3.connect(DATA_FILE)
+    cur = conn.cursor()
+    cur.execute('DELETE FROM messages')
+    conn.commit()
+    conn.close()
+    
+    emit('clear', broadcast=True)
 
 if __name__ == "__main__":
     init_db()
