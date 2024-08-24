@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import sqlite3
-import json
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -20,10 +20,6 @@ def init_db():
     conn.close()
 
 @app.route('/')
-def hello():
-    return "Hello World!"
-
-@app.route('/chat')
 def chat():
     conn = sqlite3.connect(DATA_FILE)
     cur = conn.cursor()
